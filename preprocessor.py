@@ -1,6 +1,6 @@
 import pandas as pd
 
-def preprocess(df):
+def fun(df):
     # filtering for eligible candidates with CGPA>=7
     df= df[df['CGPA']>=7]
 

@@ -6,15 +6,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.figure_factory as ff
 
+df1= preprocessor.fun(df_microsoft)
+df2= preprocessor.fun(df_oracle)
+
 df_microsoft= pd.read_csv('Microsoft.csv')
 df_oracle= pd.read_csv('Oracle.csv')
 
-df= preprocessor.preprocess(df_microsoft)
 
 st.sidebar.title("Placement Analysis")
 st.sidebar.image('CareerSync.png')
 
-user_menu = st.sidebar.radio(
+user_menu= st.sidebar.radio(
     'Select an Option: ',
     ('Overall Analysis','Branch-wise Analysis','Company-wise Analysis','Placed Student Analysis')
 )
