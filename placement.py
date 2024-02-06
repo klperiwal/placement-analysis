@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.figure_factory as ff
 
-df1= preprocessor.fun(df_microsoft)
-df2= preprocessor.fun(df_oracle)
 
 df_microsoft= pd.read_csv('Microsoft.csv')
 df_oracle= pd.read_csv('Oracle.csv')
 
+# df1= preprocessor.fun(df_microsoft)
+# df2= preprocessor.fun(df_oracle)
 
 st.sidebar.title("Placement Analysis")
 st.sidebar.image('CareerSync.png')
@@ -45,9 +45,16 @@ if user_menu == 'Overall Analysis':
 
     # Placed distribution
     st.subheader("Placed Distribution")
-    placed_counts= df_microsoft['Placed'].value_counts()
+
+    # Select Company
+    selected_company= st.selectbox('Select Company',['Microsoft', 'Oracle'])
+    if selected_company=='Microsoft':
+        placed_counts= df_microsoft['Placed'].value_counts()
+    elif selected_company=='Oracle':
+        placed_counts= df_oracle['Placed'].value_counts()
+
     fig_placed= px.pie(placed_counts, values=placed_counts.values, names=placed_counts.index, title='Placed Distribution')
-    fig_placed.update_traces(marker=dict(colors=['green','red'], line=dict(color='#000000', width=2)))
+    fig_placed.update_traces(marker=dict(colors=['green', 'red'], line=dict(color='#000000', width=2)))
     st.plotly_chart(fig_placed)
 
     # Branch vs CGPA
@@ -64,17 +71,19 @@ if user_menu == 'Overall Analysis':
     fig_marks.update_layout(showlegend=True)
     st.plotly_chart(fig_marks)
 
-elif user_menu=='Placed Student Analysis':
-    st.title("Specially Placed Analysis")
-    
-    # Filtering dataframe for specially placed students
-    df_placed= df_microsoft[df_microsoft['Placed'] == 'YES']
-    selected_gender= st.radio("Select Gender", ('All', 'Male', 'Female'))
 
-    if selected_gender=='Male':
-        df_placed= df_placed[df_placed['Gender']=='Male']
-    elif selected_gender=='Female':
-        df_placed= df_placed[df_placed['Gender']=='Female']
+elif user_menu == 'Placed Student Analysis':
+    st.title("Placed Students Analysis [Company Wise]")
+    
+    selected_company= st.selectbox('Select Company', ['Microsoft', 'Oracle'])
+    if selected_company=='Microsoft':
+        df_placed= df_microsoft[df_microsoft['Placed']=='YES']
+    elif selected_company=='Oracle':
+        df_placed= df_oracle[df_oracle['Placed']=='YES']
+    
+    selected_gender= st.radio("Select Gender",('All','Male','Female'))
+    if selected_gender!= 'All':
+        df_placed = df_placed[df_placed['Gender']==selected_gender]
 
     # CGPA trends for specially placed students
     st.subheader("CGPA Trends for Placed Students")
@@ -84,8 +93,8 @@ elif user_menu=='Placed Student Analysis':
 
     # Branch distribution for specially placed students
     st.subheader("Branch Distribution for Placed Students")
-    branch_counts_placed= df_placed['Branch'].value_counts()
-    fig_branch_placed= px.bar(branch_counts_placed, x=branch_counts_placed.index, y=branch_counts_placed.values, labels={'x':'Branch', 'y':'Count'}, title='Branch Distribution for Specially Placed Students')
+    branch_counts_placed = df_placed['Branch'].value_counts()
+    fig_branch_placed = px.bar(branch_counts_placed, x=branch_counts_placed.index, y=branch_counts_placed.values, labels={'x':'Branch', 'y':'Count'}, title='Branch Distribution for Specially Placed Students')
     fig_branch_placed.update_traces(marker_line_color='black', marker_line_width=1.5)
     st.plotly_chart(fig_branch_placed)
 
@@ -102,21 +111,28 @@ elif user_menu =='Branch-wise Analysis':
     st.title("Branch-wise Placement Analysis")
     
     # Select Branch
-    selected_branch=st.selectbox('Select Branch', df_microsoft['Branch'].unique())
+    selected_branch = st.selectbox('Select Branch', df_microsoft['Branch'].unique())
 
     # CGPA distribution for selected branch
     st.subheader(f"CGPA Distribution for {selected_branch}")
-    fig_cgpa_branch= px.histogram(df_microsoft[df_microsoft['Branch'] == selected_branch], x='CGPA', nbins=20, title=f'CGPA Distribution for {selected_branch}', labels={'CGPA': 'CGPA Score', 'count': 'Frequency'})
+    fig_cgpa_branch = px.histogram(df_microsoft[df_microsoft['Branch'] == selected_branch], x='CGPA', nbins=20, title=f'CGPA Distribution for {selected_branch}', labels={'CGPA': 'CGPA Score', 'count': 'Frequency'})
     fig_cgpa_branch.update_traces(marker_color='green', marker_line_color='black', marker_line_width=1.5)
     fig_cgpa_branch.update_layout(showlegend=False)
     st.plotly_chart(fig_cgpa_branch)
 
     # 10th and 12th Marks for selected branch
     st.subheader(f"10th and 12th Marks for {selected_branch}")
-    fig_marks_branch= px.scatter(df_microsoft[df_microsoft['Branch'] == selected_branch], x='10th Percentage', y='12th Percentage', title=f'10th vs 12th Marks for {selected_branch}', color='CGPA')
+    fig_marks_branch = px.scatter(df_microsoft[df_microsoft['Branch'] == selected_branch], x='10th Percentage', y='12th Percentage', title=f'10th vs 12th Marks for {selected_branch}', color='CGPA')
     fig_marks_branch.update_traces(marker_line_color='black', marker_line_width=1.5)
     fig_marks_branch.update_layout(showlegend=True)
     st.plotly_chart(fig_marks_branch)
+
+    # Gender ratio in each class (branch)
+    st.subheader(f"Gender Ratio in {selected_branch}")
+    ratio = df_microsoft[df_microsoft['Branch'] == selected_branch]['Gender'].value_counts()
+    fig_ratio = px.bar(ratio, x=ratio.index, y=ratio.values, title=f"Gender Ratio in {selected_branch}",color=['Boys','Girls'])
+    fig_ratio.update_layout(xaxis_title="Gender", yaxis_title="Count")
+    st.plotly_chart(fig_ratio)
 
 
 elif user_menu=='Company-wise Analysis':
